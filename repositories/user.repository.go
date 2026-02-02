@@ -49,7 +49,7 @@ func (r *UserRepository) FindByID(ctx context.Context, id int64) (*models.User, 
 	return &u, nil
 }
 
-func (r *UserRepository) CheckIfNameOrEmailExists(ctx context.Context, name, email string) (bool, bool, error) {
+func (r *UserRepository) CheckConflict(ctx context.Context, name, email string) (bool, bool, error) {
 	query := `
 		SELECT
 			COUNT(*) FILTER (WHERE email = $1) AS email_count,
@@ -67,4 +67,27 @@ func (r *UserRepository) CheckIfNameOrEmailExists(ctx context.Context, name, ema
 
 	return emailCount > 0, nameCount > 0, nil
 
+}
+
+func (r *UserRepository) Create(
+	ctx context.Context,
+	user *models.User,
+) (*models.User, error) {
+
+	query := `
+		INSERT INTO users (name, email, password)
+		VALUES ($1, $2, $3)
+		RETURNING id, created_at
+	`
+	err := r.DB.QueryRowContext(ctx, query,
+		user.Name,
+		user.Email,
+		user.Password,
+	).Scan(&user.ID, &user.CreatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
