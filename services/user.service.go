@@ -6,16 +6,15 @@ import (
 	"gin-app/dto"
 	"gin-app/errors"
 	"gin-app/models"
-	"gin-app/repositories"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
-	repo *repositories.UserRepository
+	repo UserRepository
 }
 
-func NewUserService(repo *repositories.UserRepository) *UserService {
+func NewUserService(repo UserRepository) *UserService {
 	return &UserService{repo: repo}
 }
 
